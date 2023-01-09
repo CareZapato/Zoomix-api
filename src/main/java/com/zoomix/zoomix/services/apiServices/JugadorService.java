@@ -33,10 +33,14 @@ public class JugadorService{
         return jugadorRepository.findByNick(nick);
     }
 
-    public InsertarJugadoresResponse insertarJugadores(Iterable<JugadoresJsonDTO> jugadoresJsonDTO){
+    public Iterable<Jugador> findByNombre(String nick){
+        return jugadorRepository.findByNombre(nick);
+    }
+
+    public InsertarJugadoresResponse insertarJugadores(Jugador[] jugadores){
         InsertarJugadoresResponse response = new InsertarJugadoresResponse();
         List<String> lista = new ArrayList<>();
-        for(JugadoresJsonDTO jugador: jugadoresJsonDTO){
+        for(Jugador jugador: jugadores){
             if(Iterables.size(jugadorRepository.findByNick(jugador.getNick())) == 0){
                 Jugador nuevoJugador = new Jugador(jugador.getNombre(),jugador.getNick());
                 try{
@@ -56,6 +60,22 @@ public class JugadorService{
             }
         }
         response.setResponse(lista.size() > 0 ? "Inserción correcta" : "No hubo inserciones");
+        return response;
+    }
+
+    public InsertarJugadoresResponse eliminarJugadores(){
+        InsertarJugadoresResponse response = new InsertarJugadoresResponse();
+        try{
+            Long cant = jugadorRepository.count();
+            jugadorRepository.deleteAll();
+            response.setEliminados(cant);
+            response.setResponse("Se eliminaron todas las jugadors de la Base de datos");
+        }catch(Exception e){
+            response.setResponse("Error al eliminar jugadors");
+            response.setError(e.toString());
+            log.error("[JugadorService][eliminarJugadors] - Error al eliminar jugadors");
+            return response;
+        }
         return response;
     }
 }

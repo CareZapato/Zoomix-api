@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
+import com.zoomix.zoomix.repositories.ColorRepository;
 import com.zoomix.zoomix.models.Categoria;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,6 +26,9 @@ public class CategoriaService{
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+    @Autowired
+    private ColorRepository colorRepository;
+
     public Iterable<Categoria> listaCategorias(){
         return categoriaRepository.findAll();
     }
@@ -33,12 +37,13 @@ public class CategoriaService{
         return categoriaRepository.findByNombre(categoriaEntrada);
     }
 
-    public InsertarCategoriasResponse insertarCategorias(Iterable<CategoriasJsonDTO> categoriasJsonDTO){
+    public InsertarCategoriasResponse insertarCategorias(Categoria[] categorias){
         InsertarCategoriasResponse response = new InsertarCategoriasResponse();
         List<String> lista = new ArrayList<>();
-        for(CategoriasJsonDTO categoria: categoriasJsonDTO){
+        for(Categoria categoria: categorias){
             if(Iterables.size(categoriaRepository.findByNombre(categoria.getNombre())) == 0){
                 Categoria nuevaCategoria = new Categoria(categoria.getNombre(),categoria.getDescripcion());
+                nuevaCategoria.setColor(colorRepository.findById(categoria.getColor().getColorId()).get());
                 try{
                     categoriaRepository.save(nuevaCategoria);
                     response.setNuevos(response.getNuevos() + 1);

@@ -8,8 +8,8 @@ import lombok.Data;
 public class InsertarPreguntasResponse {
     String response;
     String error;
-    List<String> listaPreguntas;
-    int nuevos;
     int repetidos;
+    int insertados;
+    int errores;
     Long eliminados;
 }

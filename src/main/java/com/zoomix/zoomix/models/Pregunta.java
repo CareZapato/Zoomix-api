@@ -18,7 +18,7 @@ public class Pregunta implements Serializable {
     @Column(name="pregunta_id")
     @GeneratedValue(generator = "pregunta_id_seq")
     @SequenceGenerator(name = "pregunta_id_seq", sequenceName = "public.pregunta_id_seq", allocationSize = 1)
-    private Long categoriaId;
+    private Long preguntaId;
     
     @Column(name="TEXTO")
     private String texto;
@@ -43,8 +43,9 @@ public class Pregunta implements Serializable {
     @JoinColumn(name= "jugador_id", referencedColumnName="jugador_id")
     private Jugador jugador;
 
-    public Pregunta(String texto){
-        this.texto = texto;
+    public Pregunta(Pregunta pregunta){
+        this.texto = pregunta.getTexto();
+        this.likes = pregunta.getLikes();
         this.activo = true;
         this.createdAt = new Date(System.currentTimeMillis());
         this.updatedAt = new Date(System.currentTimeMillis());

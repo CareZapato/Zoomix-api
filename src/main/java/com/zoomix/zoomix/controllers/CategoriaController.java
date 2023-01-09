@@ -44,10 +44,10 @@ public class CategoriaController {
 
 	@PostMapping("/insertarCategorias")
 	public ResponseEntity<InsertarCategoriasResponse> insertarCategorias(
-		@RequestBody Iterable<CategoriasJsonDTO> categoriasJsonDTO
+		@RequestBody Categoria[] categorias
 	) {
 		log.info("[CategoriaController][insertarCategorias]");
-		return new ResponseEntity<InsertarCategoriasResponse>(categoriaService.insertarCategorias(categoriasJsonDTO), HttpStatus.OK);
+		return new ResponseEntity<InsertarCategoriasResponse>(categoriaService.insertarCategorias(categorias), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/eliminarCategorias")

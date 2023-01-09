@@ -18,7 +18,7 @@ public class Jugador implements Serializable {
     @Column(name="jugador_id")
     @GeneratedValue(generator = "jugador_id_seq")
     @SequenceGenerator(name = "jugador_id_seq", sequenceName = "public.jugador_id_seq", allocationSize = 1)
-    private Long colorId;
+    private Long jugadorId;
     
     @Column(name="NOMBRE")
     private String nombre;
