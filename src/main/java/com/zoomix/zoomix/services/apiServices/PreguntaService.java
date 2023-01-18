@@ -14,7 +14,9 @@ import com.zoomix.zoomix.models.Pregunta;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
 import com.zoomix.zoomix.repositories.JugadorRepository;
 import com.zoomix.zoomix.repositories.PreguntaRepository;
+import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.InsertarListaPreguntasDTO;
 import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.InsertarPreguntasResponse;
+import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.insertarListaPreguntasResponse;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -83,6 +85,7 @@ public class PreguntaService {
     public InsertarPreguntasResponse insertarPregunta(Pregunta pregunta){
         InsertarPreguntasResponse response = new InsertarPreguntasResponse();
         List<String> lista = new ArrayList<>();
+        boolean insertado = false;
         Iterable<Pregunta> pregs = preguntaRepository.findByTextoAndJugadorJugadorIdAndCategoriaCategoriaId(
             pregunta.getTexto(),
             pregunta.getJugador().getJugadorId(),
@@ -94,6 +97,8 @@ public class PreguntaService {
             nuevaPregunta.setJugador(jugadorRepository.findById(pregunta.getJugador().getJugadorId()).get());    
             try{
                 preguntaRepository.save(nuevaPregunta);
+                insertado = true;
+                response.setInsertados(1);
                 response.setResponse("pregunta "+pregunta.toString()+" insertado correctamente");
                 log.info("[PreguntaService][insertarPregunta] - pregunta "+pregunta.toString()+" insertado correctamente");
             }catch(Exception e){
@@ -104,7 +109,7 @@ public class PreguntaService {
         }else{
             log.info("[PreguntaService][insertarPregunta] - ya existia la pregunta "+pregunta.getTexto()+" y no fue necesario insertarlo");
         }
-        response.setResponse(lista.size() > 0 ? "Inserción correcta" : "No hubo inserciones");
+        response.setResponse(insertado ? "Inserción correcta" : "No hubo inserciones");
         return response;
     }
 
@@ -152,5 +157,34 @@ public class PreguntaService {
         Random random = new Random();
         int indice = random.nextInt(Iterables.size(preguntas));
         return preguntas.get(indice);
+    }
+
+    public insertarListaPreguntasResponse insertarListaPreguntas(ArrayList<InsertarListaPreguntasDTO> listaPreguntasDTO) {
+        insertarListaPreguntasResponse response = new insertarListaPreguntasResponse();
+        int cat = 0;
+        int text = 0;
+        for (InsertarListaPreguntasDTO preguntaDTO : listaPreguntasDTO) {
+            for (String texto : preguntaDTO.getTexto()) {
+                Pregunta pregunta = new Pregunta();
+                pregunta.setTexto(texto);
+                pregunta.setCategoria(categoriaRepository.findById(preguntaDTO.getCategoria().getCategoriaId()).get());
+                pregunta.setJugador(jugadorRepository.findById(preguntaDTO.getJugador().getJugadorId()).get());  
+                pregunta.setActivo(true);
+                pregunta.setLikes(0);
+                try{
+                    preguntaRepository.save(pregunta);
+                    text++;
+                    log.info("[PreguntaService][insertarListaPreguntas] - pregunta "+pregunta.toString()+" insertado correctamente");
+
+                }catch(Exception e){
+                    log.error("[PreguntaService][insertarListaPreguntas] - Error al insertar pregunta desde la lista de preguntas");
+                    response.setError("Error al insertar pregunta "+pregunta.toString());
+                    return response;
+                }
+            }
+            cat++;
+        }
+        response.setResponse("Se insertan "+text+" preguntas en "+cat+" categorias distintas");
+        return response;
     }
 }
