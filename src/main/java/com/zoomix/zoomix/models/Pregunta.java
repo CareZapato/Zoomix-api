@@ -52,6 +52,8 @@ public class Pregunta implements Serializable {
     }
 
     public Pregunta(){
+        this.createdAt = new Date(System.currentTimeMillis());
+        this.updatedAt = new Date(System.currentTimeMillis());
     }
 
 }

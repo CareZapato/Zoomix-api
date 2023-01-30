@@ -28,10 +28,13 @@ public class RootController {
 
     @Value( "${project.info.ambiente}" )
     String ambiente;
+
+    @Value( "${project.info.date}" )
+    String date;
     
     @GetMapping("/")
 	public ResponseEntity<String> presentacion() {
         log.info("[RootController][presentacion]");
-		return new ResponseEntity<String>(name+" "+version+" | "+ambiente, HttpStatus.OK);
+		return new ResponseEntity<String>(name+" "+version+" | "+ambiente+"@"+date, HttpStatus.OK);
 	}
 }
