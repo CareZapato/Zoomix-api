@@ -9,9 +9,6 @@ import com.google.common.collect.Iterables;
 import com.zoomix.zoomix.repositories.JugadorRepository;
 import com.zoomix.zoomix.models.Jugador;
 import java.util.ArrayList;
-import java.util.Date;
-
-import com.zoomix.zoomix.services.apiServices.DTO.Jugador.JugadoresJsonDTO;
 import com.zoomix.zoomix.services.apiServices.DTO.Jugador.InsertarJugadoresResponse;
 
 

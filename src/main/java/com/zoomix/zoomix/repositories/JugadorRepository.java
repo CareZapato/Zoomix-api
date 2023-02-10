@@ -11,4 +11,6 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     public Iterable<Jugador> findByNombre(String nombre);
 
     public Iterable<Jugador> findByNick(String nick);
+
+    public Jugador findByJugadorId(Long jugadorId);
 }

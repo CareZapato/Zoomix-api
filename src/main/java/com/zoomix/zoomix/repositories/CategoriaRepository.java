@@ -9,4 +9,6 @@ import com.zoomix.zoomix.models.Categoria;
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     
     public Iterable<Categoria> findByNombre(String nombre);
+
+    public Categoria findByCategoriaId(Long categoriaId);
 }

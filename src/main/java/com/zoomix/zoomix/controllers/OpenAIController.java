@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zoomix.zoomix.models.Pregunta;
 import com.zoomix.zoomix.services.apiServices.OpenAIService;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.OpenAIRequest;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.TextCompletion;
@@ -34,8 +35,8 @@ public class OpenAIController {
     }
 
     @GetMapping("/askOpenAICategoria")
-    public ResponseEntity<TextCompletion> askOpenAICategoria() {
+    public ResponseEntity<Pregunta> askOpenAICategoria() {
         log.info("[OpenAIController][askOpenAICategoria]");
-        return new ResponseEntity<TextCompletion>(openAIService.askOpenAICategoria(), HttpStatus.OK);
+        return new ResponseEntity<Pregunta>(openAIService.askOpenAICategoria(), HttpStatus.OK);
     }
 }
