@@ -8,6 +8,7 @@ public class Constants {
     final public static Long ID_JUGADOR_OPENAI = (long) 2;
     final public static Long ID_CATEGORIA_OPENAI = (long) 4;
     final public static int MAX_TOKENS = 100;
+    final public static String OPENAI_KEY = "OPENAI_KEY";
 
     // RUTAS OPENAI
 

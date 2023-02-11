@@ -1,5 +1,7 @@
 package com.zoomix.zoomix.services.apiServices;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,8 +11,11 @@ import org.springframework.http.MediaType;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+
+import com.zoomix.zoomix.models.Config;
 import com.zoomix.zoomix.models.Pregunta;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
+import com.zoomix.zoomix.repositories.ConfigRepository;
 import com.zoomix.zoomix.repositories.JugadorRepository;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.OpenAIRequest;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.TextCompletion;
@@ -23,8 +28,8 @@ import com.zoomix.zoomix.utils.Constants;
 @Log4j2
 public class OpenAIService{
 
-    @Value( "${openai.api.key}" )
-    String API_KEY_OPENAI;
+    @Autowired
+    private ConfigRepository configRepository;
 
     @Autowired
     private JugadorRepository jugadorRepository;
@@ -32,13 +37,13 @@ public class OpenAIService{
     @Autowired
     private CategoriaRepository categoriaRepository;
     
+    @Transactional
     public TextCompletion askOpenAI(OpenAIRequest question) {
         log.info("[OpenAIService][askOpenAI]");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY_OPENAI);
-
+        headers.setBearerAuth(getOpenAI_APIKEY());
         HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
         TextCompletion response = restTemplate.postForObject(
             Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
@@ -51,7 +56,7 @@ public class OpenAIService{
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY_OPENAI);
+        headers.setBearerAuth(getOpenAI_APIKEY());
         OpenAIRequest question = new OpenAIRequest(
             Constants.MODEL_TEXT_OPENAI,
             generarConsultaOpenAi(),
@@ -81,5 +86,20 @@ public class OpenAIService{
 
     public String generarConsultaOpenAi(){
         return Constants.CONOCER+" "+Constants.ESTRUCTURA_RESPONSE;
+    }
+
+    public String getOpenAI_APIKEY(){
+        try{
+            ArrayList<Config> configs = configRepository.findByVariable(Constants.OPENAI_KEY);
+            if(configs.size()>0){
+                return configs.get(0).getValue();
+            }else{
+                log.error("[OpenAIService][getOpenAI_APIKEY] ERROR: No encontró la variable: OPENAI_KEY");
+                return null;
+            }
+        }catch(Exception e){
+            log.error("[OpenAIService][getOpenAI_APIKEY] ERROR: Error al consultar la OPENAI_KEY");
+            return null;
+        }
     }
 }
