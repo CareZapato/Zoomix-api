@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 
 import com.zoomix.zoomix.models.Config;
 import com.zoomix.zoomix.models.Pregunta;
+import com.zoomix.zoomix.models.Categoria;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
 import com.zoomix.zoomix.repositories.ConfigRepository;
 import com.zoomix.zoomix.repositories.JugadorRepository;
@@ -51,15 +52,16 @@ public class OpenAIService{
         return response;
     }
 
-    public Pregunta askOpenAICategoria() {
+    public Pregunta askOpenAICategoria(Long categoriaId) {
         log.info("[OpenAIService][askOpenAICategoria]");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(getOpenAI_APIKEY());
+        Categoria categoriarequest = categoriaRepository.findByCategoriaId(categoriaId);
         OpenAIRequest question = new OpenAIRequest(
             Constants.MODEL_TEXT_OPENAI,
-            generarConsultaOpenAi(),
+            generarConsultaOpenAi(categoriarequest),
             Constants.MAX_TOKENS);
         try{
             HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
@@ -69,7 +71,7 @@ public class OpenAIService{
             Pregunta pregunta = new Pregunta();
             pregunta.setActivo(true);
             pregunta.setJugador(jugadorRepository.findByJugadorId(Constants.ID_JUGADOR_OPENAI));
-            pregunta.setCategoria(categoriaRepository.findByCategoriaId(Constants.ID_CATEGORIA_OPENAI));
+            pregunta.setCategoria(categoriaRepository.findByNombre(categoriarequest.getNombre()).iterator().next());
             pregunta.setLikes(0);
             
             log.info("[OpenAIService][askOpenAICategoria] INFO: pregunta:"+response.getChoices().get(0).getText());
@@ -84,8 +86,9 @@ public class OpenAIService{
         }
     }
 
-    public String generarConsultaOpenAi(){
-        return Constants.CONOCER+" "+Constants.ESTRUCTURA_RESPONSE;
+    public String generarConsultaOpenAi(Categoria categoria){
+        System.out.println(categoria.getDescripcion()+" "+getOpenAI_ESTRUCTURA_RESPONSE());
+        return categoria.getDescripcion()+" "+getOpenAI_ESTRUCTURA_RESPONSE();
     }
 
     public String getOpenAI_APIKEY(){
@@ -99,6 +102,21 @@ public class OpenAIService{
             }
         }catch(Exception e){
             log.error("[OpenAIService][getOpenAI_APIKEY] ERROR: Error al consultar la OPENAI_KEY");
+            return null;
+        }
+    }
+
+    public String getOpenAI_ESTRUCTURA_RESPONSE(){
+        try{
+            ArrayList<Config> configs = configRepository.findByVariable(Constants.ESTRUCTURA_RESPONSE);
+            if(configs.size()>0){
+                return configs.get(0).getValue();
+            }else{
+                log.error("[OpenAIService][getOpenAI_ESTRUCTURA_RESPONSE] ERROR: No encontró la variable: ESTRUCTURA_RESPONSE");
+                return null;
+            }
+        }catch(Exception e){
+            log.error("[OpenAIService][getOpenAI_ESTRUCTURA_RESPONSE] ERROR: Error al consultar la ESTRUCTURA_RESPONSE");
             return null;
         }
     }

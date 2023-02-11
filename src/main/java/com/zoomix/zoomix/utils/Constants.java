@@ -9,6 +9,7 @@ public class Constants {
     final public static Long ID_CATEGORIA_OPENAI = (long) 4;
     final public static int MAX_TOKENS = 100;
     final public static String OPENAI_KEY = "OPENAI_KEY";
+    final public static String ESTRUCTURA_RESPONSE = "ESTRUCTURA_RESPONSE";
 
     // RUTAS OPENAI
 
@@ -17,8 +18,6 @@ public class Constants {
     // PREGUNTAS PARA OPENAI
 
     //final public static String estructura_response = "Primero un punto y coma, luego el texto de la pregunta, luego un punto y coma, el nombre del color en ingles, luego punto y coma";
-    final public static String ESTRUCTURA_RESPONSE = ";texto_pregunta;color_en_background_color;explicacion_porque_ese_color";
-
     final public static String CONOCER = "Crea una lista de 1 pregunta para conocerse con un grupo de amigos y dame un color que defina el animo de la pregunta con la siguiente estructura:";
     
     final public static String CULTURAL = "Crea una lista de 1 pregunta sobre cultura general para compartir con amigos";

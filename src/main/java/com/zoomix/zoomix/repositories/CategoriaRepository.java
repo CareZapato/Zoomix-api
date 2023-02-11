@@ -10,5 +10,7 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     
     public Iterable<Categoria> findByNombre(String nombre);
 
+    public String findDescripcionByNombre(String nombre);
+
     public Categoria findByCategoriaId(Long categoriaId);
 }
