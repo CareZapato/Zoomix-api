@@ -74,10 +74,12 @@ public class OpenAIService{
             pregunta.setCategoria(categoriaRepository.findByNombre(categoriarequest.getNombre()).iterator().next());
             pregunta.setLikes(0);
             
-            log.info("[OpenAIService][askOpenAICategoria] INFO: pregunta:"+response.getChoices().get(0).getText());
+            log.info("[OpenAIService][askOpenAICategoria] INFO: Pregunta OpenAI:"+response.getChoices().get(0).getText());
             pregunta.setTexto(response.getChoices().get(0).getText().split(";")[1]);
             pregunta.setColorOpenAI(response.getChoices().get(0).getText().split(";")[2]);
             pregunta.setExplicacionColorOpenAI(response.getChoices().get(0).getText().split(";")[3]);
+            pregunta.setConcecuencia(response.getChoices().get(0).getText().split(";")[4]);
+            pregunta.setRespuesta(response.getChoices().get(0).getText().split(";")[5]);
 
             return pregunta;
         }catch(Exception e){
@@ -87,8 +89,8 @@ public class OpenAIService{
     }
 
     public String generarConsultaOpenAi(Categoria categoria){
-        System.out.println(categoria.getDescripcion()+" "+getOpenAI_ESTRUCTURA_RESPONSE());
-        return categoria.getDescripcion()+" "+getOpenAI_ESTRUCTURA_RESPONSE();
+        System.out.println(categoria.getDescripcion()+" "+categoria.getFormato());
+        return categoria.getDescripcion()+" "+categoria.getFormato();
     }
 
     public String getOpenAI_APIKEY(){

@@ -6,4 +6,5 @@ import lombok.Data;
 public class CategoriasJsonDTO {
     String nombre;
     String descripcion;
+    String formato;
 }

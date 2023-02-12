@@ -23,8 +23,11 @@ public class Categoria implements Serializable {
     @Column(name="NOMBRE")
     private String nombre;
 
-    @Column(name="DESCRIPCION")
+    @Column(name="DESCRIPCION", length=512)
     private String descripcion;
+
+    @Column(name="FORMATO", length=512)
+    private String formato;
 
     @Column(name="CREATEDAT")
     private Date createdAt;
@@ -36,9 +39,10 @@ public class Categoria implements Serializable {
     @JoinColumn(name= "color_id", referencedColumnName="color_id")
     private Color color;
 
-    public Categoria(String nombre, String descripcion){
+    public Categoria(String nombre, String descripcion, String formato){
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.formato = formato;
         this.createdAt = new Date(System.currentTimeMillis());
         this.updatedAt = new Date(System.currentTimeMillis());
     }

@@ -42,7 +42,11 @@ public class CategoriaService{
         List<String> lista = new ArrayList<>();
         for(Categoria categoria: categorias){
             if(Iterables.size(categoriaRepository.findByNombre(categoria.getNombre())) == 0){
-                Categoria nuevaCategoria = new Categoria(categoria.getNombre(),categoria.getDescripcion());
+                Categoria nuevaCategoria = new Categoria(
+                    categoria.getNombre(),
+                    categoria.getDescripcion(),
+                    categoria.getFormato()
+                );
                 nuevaCategoria.setColor(colorRepository.findById(categoria.getColor().getColorId()).get());
                 try{
                     categoriaRepository.save(nuevaCategoria);
