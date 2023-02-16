@@ -39,11 +39,20 @@ public class Pregunta implements Serializable {
     @JoinColumn(name= "categoria_id", referencedColumnName="categoria_id")
     private Categoria categoria;
 
+    @Column(name="LINK")
+    private String link;
+
     @Column(name="COLOROPENAI")
     private String colorOpenAI;
 
     @Column(name="EXPLICACIONCOLOROPENAI")
     private String explicacionColorOpenAI;
+
+    @Column(name="CONSECUENCIA")
+    private String concecuencia;
+
+    @Column(name="RESPUESTA")
+    private String respuesta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "jugador_id", referencedColumnName="jugador_id")

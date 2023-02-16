@@ -1,5 +1,7 @@
 package com.zoomix.zoomix.services.apiServices;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,8 +11,12 @@ import org.springframework.http.MediaType;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+
+import com.zoomix.zoomix.models.Config;
 import com.zoomix.zoomix.models.Pregunta;
+import com.zoomix.zoomix.models.Categoria;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
+import com.zoomix.zoomix.repositories.ConfigRepository;
 import com.zoomix.zoomix.repositories.JugadorRepository;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.OpenAIRequest;
 import com.zoomix.zoomix.services.apiServices.DTO.OpenAI.TextCompletion;
@@ -23,8 +29,8 @@ import com.zoomix.zoomix.utils.Constants;
 @Log4j2
 public class OpenAIService{
 
-    @Value( "${openai.api.key}" )
-    String API_KEY_OPENAI;
+    @Autowired
+    private ConfigRepository configRepository;
 
     @Autowired
     private JugadorRepository jugadorRepository;
@@ -32,13 +38,13 @@ public class OpenAIService{
     @Autowired
     private CategoriaRepository categoriaRepository;
     
+    @Transactional
     public TextCompletion askOpenAI(OpenAIRequest question) {
         log.info("[OpenAIService][askOpenAI]");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY_OPENAI);
-
+        headers.setBearerAuth(getOpenAI_APIKEY());
         HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
         TextCompletion response = restTemplate.postForObject(
             Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
@@ -46,40 +52,81 @@ public class OpenAIService{
         return response;
     }
 
-    public Pregunta askOpenAICategoria() {
+    public Pregunta askOpenAICategoria(Long categoriaId) {
         log.info("[OpenAIService][askOpenAICategoria]");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY_OPENAI);
+        headers.setBearerAuth(getOpenAI_APIKEY());
+        Categoria categoriarequest = categoriaRepository.findByCategoriaId(categoriaId);
         OpenAIRequest question = new OpenAIRequest(
             Constants.MODEL_TEXT_OPENAI,
-            generarConsultaOpenAi(),
+            generarConsultaOpenAi(categoriarequest),
             Constants.MAX_TOKENS);
+        Pregunta pregunta = new Pregunta();
+        int intento = 0; 
+        while(pregunta.getTexto() == null && intento < Constants.CANTIDAD_INTENTOS_OPENAI){
+            try{
+                HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
+                TextCompletion response = restTemplate.postForObject(
+                    Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
+                
+                pregunta.setActivo(true);
+                pregunta.setJugador(jugadorRepository.findByJugadorId(Constants.ID_JUGADOR_OPENAI));
+                pregunta.setCategoria(categoriaRepository.findByNombre(categoriarequest.getNombre()).iterator().next());
+                pregunta.setLikes(0);
+                
+                log.info("[OpenAIService][askOpenAICategoria] INFO: Pregunta OpenAI:"+response.getChoices().get(0).getText());
+                pregunta.setTexto(response.getChoices().get(0).getText().split(";")[1]);
+                pregunta.setColorOpenAI(response.getChoices().get(0).getText().split(";")[2]);
+                pregunta.setExplicacionColorOpenAI(response.getChoices().get(0).getText().split(";")[3]);
+                pregunta.setConcecuencia(response.getChoices().get(0).getText().split(";")[4]);
+                pregunta.setRespuesta(response.getChoices().get(0).getText().split(";")[5]);
+            }
+            catch(Exception e){
+                log.error("[OpenAIService][askOpenAICategoria] ERROR: Error al consultar por la pregunta en OpenAI");
+                return null;
+            }  
+            if(pregunta.getTexto() == null){
+                intento++;
+                log.error("[OpenAIService][askOpenAICategoria] ERROR: Entidad Pregunta vacía, intento: "+intento); 
+            }
+        }
+        return pregunta;
+        
+    }
+
+    public String generarConsultaOpenAi(Categoria categoria){
+        return categoria.getDescripcion()+" "+categoria.getFormato();
+    }
+
+    public String getOpenAI_APIKEY(){
         try{
-            HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
-            TextCompletion response = restTemplate.postForObject(
-                Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
-
-            Pregunta pregunta = new Pregunta();
-            pregunta.setActivo(true);
-            pregunta.setJugador(jugadorRepository.findByJugadorId(Constants.ID_JUGADOR_OPENAI));
-            pregunta.setCategoria(categoriaRepository.findByCategoriaId(Constants.ID_CATEGORIA_OPENAI));
-            pregunta.setLikes(0);
-            
-            log.info("[OpenAIService][askOpenAICategoria] INFO: pregunta:"+response.getChoices().get(0).getText());
-            pregunta.setTexto(response.getChoices().get(0).getText().split(";")[1]);
-            pregunta.setColorOpenAI(response.getChoices().get(0).getText().split(";")[2]);
-            pregunta.setExplicacionColorOpenAI(response.getChoices().get(0).getText().split(";")[3]);
-
-            return pregunta;
+            ArrayList<Config> configs = configRepository.findByVariable(Constants.OPENAI_KEY);
+            if(configs.size()>0){
+                return configs.get(0).getValue();
+            }else{
+                log.error("[OpenAIService][getOpenAI_APIKEY] ERROR: No encontró la variable: OPENAI_KEY");
+                return null;
+            }
         }catch(Exception e){
-            log.error("[OpenAIService][askOpenAICategoria] ERROR: Error al consultar por la pregunta en OpenAI");
+            log.error("[OpenAIService][getOpenAI_APIKEY] ERROR: Error al consultar la OPENAI_KEY");
             return null;
         }
     }
 
-    public String generarConsultaOpenAi(){
-        return Constants.CONOCER+" "+Constants.ESTRUCTURA_RESPONSE;
+    public String getOpenAI_ESTRUCTURA_RESPONSE(){
+        try{
+            ArrayList<Config> configs = configRepository.findByVariable(Constants.ESTRUCTURA_RESPONSE);
+            if(configs.size()>0){
+                return configs.get(0).getValue();
+            }else{
+                log.error("[OpenAIService][getOpenAI_ESTRUCTURA_RESPONSE] ERROR: No encontró la variable: ESTRUCTURA_RESPONSE");
+                return null;
+            }
+        }catch(Exception e){
+            log.error("[OpenAIService][getOpenAI_ESTRUCTURA_RESPONSE] ERROR: Error al consultar la ESTRUCTURA_RESPONSE");
+            return null;
+        }
     }
 }
