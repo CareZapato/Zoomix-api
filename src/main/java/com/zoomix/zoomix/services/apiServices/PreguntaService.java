@@ -9,11 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
-import com.zoomix.zoomix.models.Categoria;
 import com.zoomix.zoomix.models.Pregunta;
 import com.zoomix.zoomix.repositories.CategoriaRepository;
 import com.zoomix.zoomix.repositories.JugadorRepository;
 import com.zoomix.zoomix.repositories.PreguntaRepository;
+
+import com.zoomix.zoomix.services.apiServices.CodigoGenerator;
 import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.InsertarListaPreguntasDTO;
 import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.InsertarPreguntasResponse;
 import com.zoomix.zoomix.services.apiServices.DTO.Pregunta.insertarListaPreguntasResponse;
@@ -33,6 +34,9 @@ public class PreguntaService {
 
     @Autowired
     private JugadorRepository jugadorRepository;
+
+    @Autowired
+    private CodigoGenerator codigoGenerator;
 
     
     public Iterable<Pregunta> listaPreguntas(){
@@ -95,15 +99,21 @@ public class PreguntaService {
             Pregunta nuevaPregunta = new Pregunta(pregunta);   
             nuevaPregunta.setCategoria(categoriaRepository.findById(pregunta.getCategoria().getCategoriaId()).get());
             nuevaPregunta.setJugador(jugadorRepository.findById(pregunta.getJugador().getJugadorId()).get());    
+            nuevaPregunta.setColorOpenAI(pregunta.getColorOpenAI());
+            nuevaPregunta.setConcecuencia(pregunta.getConcecuencia());
+            nuevaPregunta.setExplicacionColorOpenAI(pregunta.getExplicacionColorOpenAI());
+            nuevaPregunta.setLink(codigoGenerator.generarCodigo());
+            nuevaPregunta.setRespuesta(pregunta.getRespuesta());
+            
             try{
                 preguntaRepository.save(nuevaPregunta);
                 insertado = true;
                 response.setInsertados(1);
-                response.setResponse("pregunta "+pregunta.toString()+" insertado correctamente");
-                log.info("[PreguntaService][insertarPregunta] - pregunta "+pregunta.toString()+" insertado correctamente");
+                response.setResponse("pregunta "+pregunta.getTexto()+" insertado correctamente");
+                log.info("[PreguntaService][insertarPregunta] - pregunta "+pregunta.getTexto()+" insertado correctamente");
             }catch(Exception e){
                 log.error("[PreguntaService][insertarPregunta] - Error al insertar pregunta");
-                response.setError("Error al insertar pregunta "+pregunta.toString());
+                response.setError("Error al insertar pregunta "+pregunta.getTexto());
                 return response;
             }
         }else{

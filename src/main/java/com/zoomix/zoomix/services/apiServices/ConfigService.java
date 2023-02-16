@@ -32,6 +32,12 @@ public class ConfigService {
         return configRepository.findByVariable(configEntrada);
     }
 
+    public String findValueByVariable(String value){
+        log.info("[ConfigService][findValueByVariable] Se obtiene valor de Config "+value);
+        return configRepository.findValueByVariable(value).get(0).getValue();
+        
+    }
+
     public InsertarConfigsResponse insertarConfigs(Iterable<ConfigsJsonDTO> configsJsonDTO){
         InsertarConfigsResponse response = new InsertarConfigsResponse();
         List<String> lista = new ArrayList<>();

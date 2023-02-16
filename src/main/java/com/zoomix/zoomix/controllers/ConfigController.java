@@ -44,6 +44,14 @@ public class ConfigController {
 		return new ResponseEntity<Iterable<Config>>(configService.findByVariable(configVariable), HttpStatus.OK);
 	}
 
+	@GetMapping("/value/{configValue}")
+	public ResponseEntity<String> configValue(
+		@PathVariable String configValue
+	) {
+		log.info("[ConfigController][configValue]");
+		return new ResponseEntity<String>(configService.findValueByVariable(configValue), HttpStatus.OK);
+	}
+
 	@PostMapping("/insertarConfigs")
 	public ResponseEntity<InsertarConfigsResponse> insertarConfigs(
 		@RequestBody Iterable<ConfigsJsonDTO> configsJsonDTO

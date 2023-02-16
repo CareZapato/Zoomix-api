@@ -13,6 +13,8 @@ import com.zoomix.zoomix.models.Config;
 public interface ConfigRepository extends JpaRepository<Config, Long> {
     
     public ArrayList<Config> findByVariable(String nombre);
+
+    public ArrayList<Config> findValueByVariable(String value);
     
 }
     

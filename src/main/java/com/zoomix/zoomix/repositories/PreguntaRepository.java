@@ -12,6 +12,8 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
     
     public Iterable<Pregunta> findByTexto(String texto);
 
+    public Iterable<Pregunta> findByLink(String link);
+
     public Iterable<Pregunta> findByTextoAndJugadorJugadorIdAndCategoriaCategoriaId(String texto, Long jugador, Long categoria);
 
     public List<Pregunta> findByCategoriaCategoriaId(Long categoria);

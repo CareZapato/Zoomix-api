@@ -63,33 +63,40 @@ public class OpenAIService{
             Constants.MODEL_TEXT_OPENAI,
             generarConsultaOpenAi(categoriarequest),
             Constants.MAX_TOKENS);
-        try{
-            HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
-            TextCompletion response = restTemplate.postForObject(
-                Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
-
-            Pregunta pregunta = new Pregunta();
-            pregunta.setActivo(true);
-            pregunta.setJugador(jugadorRepository.findByJugadorId(Constants.ID_JUGADOR_OPENAI));
-            pregunta.setCategoria(categoriaRepository.findByNombre(categoriarequest.getNombre()).iterator().next());
-            pregunta.setLikes(0);
-            
-            log.info("[OpenAIService][askOpenAICategoria] INFO: Pregunta OpenAI:"+response.getChoices().get(0).getText());
-            pregunta.setTexto(response.getChoices().get(0).getText().split(";")[1]);
-            pregunta.setColorOpenAI(response.getChoices().get(0).getText().split(";")[2]);
-            pregunta.setExplicacionColorOpenAI(response.getChoices().get(0).getText().split(";")[3]);
-            pregunta.setConcecuencia(response.getChoices().get(0).getText().split(";")[4]);
-            pregunta.setRespuesta(response.getChoices().get(0).getText().split(";")[5]);
-
-            return pregunta;
-        }catch(Exception e){
-            log.error("[OpenAIService][askOpenAICategoria] ERROR: Error al consultar por la pregunta en OpenAI");
-            return null;
+        Pregunta pregunta = new Pregunta();
+        int intento = 0; 
+        while(pregunta.getTexto() == null && intento < Constants.CANTIDAD_INTENTOS_OPENAI){
+            try{
+                HttpEntity<OpenAIRequest> request = new HttpEntity<OpenAIRequest>(question, headers);
+                TextCompletion response = restTemplate.postForObject(
+                    Constants.OPENAI_PREGUNTAS_API_URL, request, TextCompletion.class);
+                
+                pregunta.setActivo(true);
+                pregunta.setJugador(jugadorRepository.findByJugadorId(Constants.ID_JUGADOR_OPENAI));
+                pregunta.setCategoria(categoriaRepository.findByNombre(categoriarequest.getNombre()).iterator().next());
+                pregunta.setLikes(0);
+                
+                log.info("[OpenAIService][askOpenAICategoria] INFO: Pregunta OpenAI:"+response.getChoices().get(0).getText());
+                pregunta.setTexto(response.getChoices().get(0).getText().split(";")[1]);
+                pregunta.setColorOpenAI(response.getChoices().get(0).getText().split(";")[2]);
+                pregunta.setExplicacionColorOpenAI(response.getChoices().get(0).getText().split(";")[3]);
+                pregunta.setConcecuencia(response.getChoices().get(0).getText().split(";")[4]);
+                pregunta.setRespuesta(response.getChoices().get(0).getText().split(";")[5]);
+            }
+            catch(Exception e){
+                log.error("[OpenAIService][askOpenAICategoria] ERROR: Error al consultar por la pregunta en OpenAI");
+                return null;
+            }  
+            if(pregunta.getTexto() == null){
+                intento++;
+                log.error("[OpenAIService][askOpenAICategoria] ERROR: Entidad Pregunta vacía, intento: "+intento); 
+            }
         }
+        return pregunta;
+        
     }
 
     public String generarConsultaOpenAi(Categoria categoria){
-        System.out.println(categoria.getDescripcion()+" "+categoria.getFormato());
         return categoria.getDescripcion()+" "+categoria.getFormato();
     }
 

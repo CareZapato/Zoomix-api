@@ -39,6 +39,9 @@ public class Pregunta implements Serializable {
     @JoinColumn(name= "categoria_id", referencedColumnName="categoria_id")
     private Categoria categoria;
 
+    @Column(name="LINK")
+    private String link;
+
     @Column(name="COLOROPENAI")
     private String colorOpenAI;
 

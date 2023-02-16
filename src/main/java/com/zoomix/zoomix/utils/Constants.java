@@ -3,6 +3,8 @@ package com.zoomix.zoomix.utils;
 public class Constants {
     final public static String resetColor = "ALTER SEQUENCE color_id_seq restart WITH 1";
 
+    final public static int CANTIDAD_INTENTOS_OPENAI = 3;
+
     // OPENAI CONFIG VALUES
     final public static String MODEL_TEXT_OPENAI = "text-davinci-003";
     final public static Long ID_JUGADOR_OPENAI = (long) 2;
