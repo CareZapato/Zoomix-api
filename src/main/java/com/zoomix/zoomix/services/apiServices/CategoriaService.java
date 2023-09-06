@@ -37,6 +37,8 @@ public class CategoriaService{
         return categoriaRepository.findByNombre(categoriaEntrada);
     }
 
+    
+
     public InsertarCategoriasResponse insertarCategorias(Categoria[] categorias){
         InsertarCategoriasResponse response = new InsertarCategoriasResponse();
         List<String> lista = new ArrayList<>();
